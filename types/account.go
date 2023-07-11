@@ -2,13 +2,18 @@ package types
 
 import (
 	"crypto/ecdsa"
-	"math/big"
 )
 
+type Address ecdsa.PublicKey
+
+func (addr *Address) Bytes() []byte {
+    return addr.Bytes()
+}
+
 type Account struct {
-	Address *ecdsa.PublicKey
-	Balance *big.Int
-	Nonce   *big.Int
+	Address Address 
+	Balance int64 
+	Nonce   int64 
 }
 
 func (acc *Account) Bytes() []byte {
