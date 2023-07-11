@@ -46,6 +46,18 @@ func (curr *State) ValidTx(tx *types.SignedTransaction) bool {
 	to := tx.To.Bytes()
 	amount := types.Itob(tx.Amount)
 
+	// verify account balance
+    balance := curr.Accounts[tx.From].Balance
+    if balance < tx.Amount {
+        return false
+    }
+
+	// if the state nonce + 1 doesnt equal submitted nonce then it is invalid
+	stateNonce := curr.Accounts[tx.From].Nonce
+	if stateNonce + 1 != tx.Nonce {
+		return false
+	}
+
 	// verify hash
 	txBytes := append(from, to...)
 	txBytes = append(txBytes, amount...)
@@ -53,21 +65,10 @@ func (curr *State) ValidTx(tx *types.SignedTransaction) bool {
 	if hash != tx.Hash() {
 		return false
 	}
-
 	// verify signature
 	r, s := tx.Signature()
     pub := ecdsa.PublicKey(tx.From)
 	valid := ecdsa.Verify(&pub, hash[:], r, s)
-
-	// verify from account balance
-
-	// if the state nonce + 1 doesnt equal submitted nonce then it is invalid
-	// may need some better logic to handle a nonce gap
-	// i.e. what happens if a higher nonce transaction reaches us first before the next transaction does?
-	stateNonce := curr.Accounts[tx.From].Nonce
-	if stateNonce + 1 != tx.Nonce {
-		return false
-	}
 
 	return valid
 }
