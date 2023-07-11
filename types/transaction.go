@@ -12,12 +12,14 @@ type RawTransaction struct {
 	From   Address
 	To     Address
 	Amount int64
+	Nonce  int64
 }
 
 type SignedTransaction struct {
 	From   Address
 	To     Address
 	Amount int64
+	Nonce  int64
 	r      *big.Int
 	s      *big.Int
 }
@@ -41,20 +43,21 @@ func (tx *RawTransaction) Sign(key *ecdsa.PrivateKey) (*SignedTransaction, error
 		tx.From,
 		tx.To,
 		tx.Amount,
+        tx.Nonce,
 		r,
 		s,
 	}, nil
 }
 
 func (tx *RawTransaction) Hash() [32]byte {
-	bytes := append(tx.From.Bytes(), tx.To.Bytes()...)
+	bytes := append(tx.From.X.Bytes(), tx.To.Y.Bytes()...)
 	bytes = append(bytes, Itob(tx.Amount)...)
 
 	return sha256.Sum256(bytes)
 }
 
 func (tx *SignedTransaction) Hash() [32]byte {
-	bytes := append(tx.From.Bytes(), tx.To.Bytes()...)
+	bytes := append(tx.From.X.Bytes(), tx.To.Y.Bytes()...)
 	bytes = append(bytes, Itob(tx.Amount)...)
 
 	return sha256.Sum256(bytes)

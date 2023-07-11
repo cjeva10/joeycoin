@@ -6,16 +6,16 @@ import (
 
 type Address ecdsa.PublicKey
 
+type AccountState struct {
+	Balance int64
+	Nonce   int64
+}
+
+type AccountMap struct {
+    state map[Address]AccountState
+}
+
 func (addr *Address) Bytes() []byte {
-    return addr.Bytes()
-}
-
-type Account struct {
-	Address Address 
-	Balance int64 
-	Nonce   int64 
-}
-
-func (acc *Account) Bytes() []byte {
-    return acc.Address.X.Bytes()
+    b := append(addr.X.Bytes(), addr.Y.Bytes()...)
+    return b
 }

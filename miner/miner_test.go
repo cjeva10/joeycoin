@@ -23,13 +23,7 @@ func TestProof(t *testing.T) {
 		t.Fatalf("Failed to generate a private key")
 	}
 
-	pub1 := priv1.PublicKey
-
-	account1 := types.Account{
-		Address: &pub1,
-		Balance: big.NewInt(1000),
-		Nonce:   big.NewInt(0),
-	}
+	var pub1 types.Address = types.Address(priv1.PublicKey)
 
 	genesis := types.Block{
 		Body:      nil,
@@ -42,7 +36,7 @@ func TestProof(t *testing.T) {
 	// generate the proof
 	genesisProof := &BlockProof{
 		Block: &genesis,
-		Miner: &account1,
+		Miner: &pub1,
 		Work:  0,
 	}
 

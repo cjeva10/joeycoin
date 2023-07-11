@@ -18,7 +18,7 @@ type Proof interface {
 
 type BlockProof struct {
 	Block *types.Block
-	Miner *types.Account
+	Miner *types.Address
 	Work  int64 // nonce
 }
 
@@ -27,7 +27,8 @@ func (proof *BlockProof) Prove() [32]byte {
 	workBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(workBytes, uint64(proof.Work))
 
-	blockBytes := append(proof.Block.Hash[:], proof.Miner.Bytes()...)
+	blockBytes := append(proof.Block.Hash[:], proof.Miner.X.Bytes()...)
+    blockBytes = append(blockBytes, proof.Miner.Y.Bytes()...)
 	blockBytes = append(blockBytes, workBytes...)
 
 	return sha256.Sum256(blockBytes)
@@ -51,10 +52,10 @@ func (proof *BlockProof) Valid() bool {
 }
 
 // create a valid proof of work for a given block and account
-func BuildProof(block *types.Block, account *types.Account) BlockProof {
+func BuildProof(block *types.Block, addr *types.Address) BlockProof {
     proof := BlockProof{
         Block: block,
-        Miner: account,
+        Miner: addr,
         Work: 0,
     }
 
