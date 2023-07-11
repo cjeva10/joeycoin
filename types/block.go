@@ -3,12 +3,12 @@ package types
 // define the structure of a block
 
 import (
+	"crypto/sha256"
 	"math/big"
-    "crypto/sha256"
 )
 
 type Block struct {
-	Body      []Transaction
+	Body      []SignedTransaction
 	Hash      [32]byte
 	PrevHash  [32]byte
 	Number    *big.Int
@@ -16,23 +16,24 @@ type Block struct {
 }
 
 func (block *Block) ValidLen() bool {
-    return len(block.Body) <= 100 && len(block.Body) >= 0
+	return len(block.Body) <= 100 && len(block.Body) >= 0
 }
 
 // block hash must equal hash of concatenated number, timestamp, tx hashes
 func (block *Block) ValidHash() bool {
-    transactions := block.Body
+	transactions := block.Body
 
-    txBytes := append(block.Number.Bytes(), block.Timestamp.Bytes()...)
-    for _, transaction := range transactions {
-        txBytes = append(txBytes, transaction.Hash[:]...) 
-    }
+	txBytes := append(block.Number.Bytes(), block.Timestamp.Bytes()...)
+	for _, transaction := range transactions {
+		hash := transaction.Hash()
+		txBytes = append(txBytes, hash[:]...)
+	}
 
-    computedHash := sha256.Sum256(txBytes)
+	computedHash := sha256.Sum256(txBytes)
 
-    if computedHash != block.Hash {
-        return false
-    }
+	if computedHash != block.Hash {
+		return false
+	}
 
-    return true
+	return true
 }
